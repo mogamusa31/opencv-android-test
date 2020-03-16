@@ -61,9 +61,8 @@ public class TestJavaCV {
         String outputDir = "/data/data/" + context.getPackageName() + "/" + folderName;
         copyAssets(context, outputDir, folderName);
         String[] files = context.getAssets().list(folderName);
-        String filePath =  outputDir + "/" + files[0];
-        System.out.println("filePath:" + filePath);
-        Mat bitmapMat = Imgcodecs.imread(filePath);
+        String path = outputDir + "/" + files[0];
+        Mat bitmapMat = Imgcodecs.imread(path);
         return convertMat(bitmapMat);
     }
 
@@ -132,10 +131,13 @@ public class TestJavaCV {
         String outputDir = "/data/data/" + context.getPackageName() + "/" + folderName;
         copyAssets(context, outputDir, folderName);
         String[] files = context.getAssets().list(folderName);
-        Mat bitmapMat = Imgcodecs.imread(outputDir + "/" + files[0]);
-        Bitmap bitmapForInfo = BitmapFactory.decodeResource(context.getResources(), R.drawable.pepper);
-        Bitmap outputBitmap = Bitmap.createBitmap(bitmapForInfo.getWidth(), bitmapForInfo.getHeight(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(bitmapMat, outputBitmap);
+        String path = outputDir + "/" + files[0];
+        // bitmapMat is bgr format
+        Mat bitmapMat = Imgcodecs.imread(path);
+        Mat testMat = new Mat(bitmapMat.getNativeObjAddr());
+        Bitmap outputBitmap = Bitmap.createBitmap(testMat.width(), testMat.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(testMat, outputBitmap);
+        outputBitmap = Bitmap.createScaledBitmap(outputBitmap, 500,500, true);
         return outputBitmap;
     }
 
@@ -145,7 +147,7 @@ public class TestJavaCV {
         Utils.bitmapToMat(bitmap, bitmapMat);
         opencv_core.Mat imageMat = TestJavaCV.convertMat(bitmapMat);
         Mat testMat = new Mat(imageMat.address());
-        Bitmap outputBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap outputBitmap = Bitmap.createBitmap(testMat.width(), testMat.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(testMat, outputBitmap);
         return outputBitmap;
     }
