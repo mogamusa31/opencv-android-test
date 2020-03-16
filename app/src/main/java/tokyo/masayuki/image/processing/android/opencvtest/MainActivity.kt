@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     val WRITE_PERMISSION = 0
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         val bitmap = BitmapFactory.decodeResource(this.resources, R.drawable.pepper)
 //        TestJavaCV.copyFileOrDir("ObjectnessTrainedModel", baseContext, this.packageName)
         TestJavaCV.calculateBoundingBox(this)
+        image_view.setImageBitmap(TestJavaCV.testLoadBitmapInDataFolder(this))
 //        var outFile: java.io.File? = java.io.File("/data/data/"+getPackageName(), "ObjNessB2W8HSV.idx.yml")
 //        val outputBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
 //        var outputSalMat = Mat()
@@ -71,7 +73,5 @@ class MainActivity : AppCompatActivity() {
 //        // Test
 //        val testMat = Mat(imageMat.address())
 //        Utils.matToBitmap(testMat, outputBitmap)
-//
-//        image_view.setImageBitmap(outputBitmap)
     }
 }

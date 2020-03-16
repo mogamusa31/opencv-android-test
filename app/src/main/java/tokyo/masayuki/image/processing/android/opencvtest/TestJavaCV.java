@@ -12,6 +12,7 @@ import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_saliency;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,17 +38,15 @@ public class TestJavaCV {
         return mat2;
     }
 
-    static FloatPointer calculateBoundingBox(Context context) {
-        //        String outputDirPath = context.getFilesDir().getPath() + "/ObjectnessTrainedModel";
-        String outputDirPath = "/data/data/" + context.getPackageName() + "/ObjectnessTrainedModel";
-        copyAssets(context, outputDirPath);
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pepper);
-        Mat bitmapMat = new Mat();
-        Utils.bitmapToMat(bitmap, bitmapMat);
-        opencv_core.Mat imageMat = TestJavaCV.convertMat(bitmapMat);
+    static FloatPointer calculateBoundingBox(Context context) throws IOException {
+        String folderName = "ObjectnessTrainedModel";
+        //        String outputDirPath = context.getFilesDir().getPath() + "/" + folderName;
+        String outputDirPath = "/data/data/" + context.getPackageName() + "/" + folderName;
+        copyAssets(context, outputDirPath, folderName);
+        opencv_core.Mat imageMat = loadImageMatWithImageInDataFolder(context);
         opencv_saliency.ObjectnessBING objectnessBING = opencv_saliency.ObjectnessBING.create();
         // assets
-        objectnessBING.setTrainingPath(context.getFilesDir().getPath() + "/ObjectnessTrainedModel");
+        objectnessBING.setTrainingPath(context.getFilesDir().getPath() + "/" + folderName);
         opencv_core.Mat bingMat = new opencv_core.Mat();
         Boolean bool = objectnessBING.computeSaliency(imageMat, bingMat);
         FloatPointer pointer = objectnessBING.getobjectnessValues();
@@ -57,13 +56,31 @@ public class TestJavaCV {
         return pointer;
     }
 
-    static void copyAssets(Context context, String outputDirPath) {
+    static opencv_core.Mat loadImageMatWithImageInDataFolder(Context context) throws IOException {
+        String folderName = "image";
+        String outputDir = "/data/data/" + context.getPackageName() + "/" + folderName;
+        copyAssets(context, outputDir, folderName);
+        String[] files = context.getAssets().list(folderName);
+        String filePath =  outputDir + "/" + files[0];
+        System.out.println("filePath:" + filePath);
+        Mat bitmapMat = Imgcodecs.imread(filePath);
+        return convertMat(bitmapMat);
+    }
+
+    static opencv_core.Mat loadImageMatWithImageInAssets(Context context) {
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pepper);
+        Mat bitmapMat = new Mat();
+        Utils.bitmapToMat(bitmap, bitmapMat);
+        return convertMat(bitmapMat);
+    }
+
+    static void copyAssets(Context context, String outputDirPath, String folderName) {
         File fileDir = new File(outputDirPath);
         fileDir.mkdir();
         AssetManager assetManager = context.getAssets();
         String[] files = null;
         try {
-            files = assetManager.list("ObjectnessTrainedModel");
+            files = assetManager.list(folderName);
         } catch (IOException e) {
             Log.e("tag", "Failed to get asset file list.", e);
         }
@@ -71,7 +88,7 @@ public class TestJavaCV {
             InputStream in = null;
             OutputStream out = null;
             try {
-                in = assetManager.open("ObjectnessTrainedModel/" + filename);
+                in = assetManager.open(folderName + "/" + filename);
                 File outFile = new File(outputDirPath, filename);
                 out = new FileOutputStream(outFile);
                 copyFile(in, out);
@@ -95,7 +112,7 @@ public class TestJavaCV {
             }
         }
         File file = new File(outputDirPath);
-        for (String fileName : file.list()){
+        for (String fileName : file.list()) {
             System.out.println(fileName);
         }
     }
@@ -106,5 +123,30 @@ public class TestJavaCV {
         while ((read = in.read(buffer)) != -1) {
             out.write(buffer, 0, read);
         }
+    }
+
+
+    // Test
+    static Bitmap testLoadBitmapInDataFolder(Context context) throws IOException {
+        String folderName = "image";
+        String outputDir = "/data/data/" + context.getPackageName() + "/" + folderName;
+        copyAssets(context, outputDir, folderName);
+        String[] files = context.getAssets().list(folderName);
+        Mat bitmapMat = Imgcodecs.imread(outputDir + "/" + files[0]);
+        Bitmap bitmapForInfo = BitmapFactory.decodeResource(context.getResources(), R.drawable.pepper);
+        Bitmap outputBitmap = Bitmap.createBitmap(bitmapForInfo.getWidth(), bitmapForInfo.getHeight(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(bitmapMat, outputBitmap);
+        return outputBitmap;
+    }
+
+    static Bitmap testLoadBitmapInAssets(Context context) throws IOException {
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pepper);
+        Mat bitmapMat = new Mat();
+        Utils.bitmapToMat(bitmap, bitmapMat);
+        opencv_core.Mat imageMat = TestJavaCV.convertMat(bitmapMat);
+        Mat testMat = new Mat(imageMat.address());
+        Bitmap outputBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(testMat, outputBitmap);
+        return outputBitmap;
     }
 }
