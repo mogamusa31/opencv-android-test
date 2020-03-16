@@ -37,7 +37,7 @@ public class TestJavaCV {
         return mat2;
     }
 
-    static FloatPointer calculateBoundingBox(Context context, String packageName) {
+    static FloatPointer calculateBoundingBox(Context context) {
         //        String outputDirPath = context.getFilesDir().getPath() + "/ObjectnessTrainedModel";
         String outputDirPath = "/data/data/" + context.getPackageName() + "/ObjectnessTrainedModel";
         copyAssets(context, outputDirPath);

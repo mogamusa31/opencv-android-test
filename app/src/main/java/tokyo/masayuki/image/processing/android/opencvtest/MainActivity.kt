@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         val bitmap = BitmapFactory.decodeResource(this.resources, R.drawable.pepper)
 //        TestJavaCV.copyFileOrDir("ObjectnessTrainedModel", baseContext, this.packageName)
-        TestJavaCV.calculateBoundingBox(this, this.packageName)
+        TestJavaCV.calculateBoundingBox(this)
 //        var outFile: java.io.File? = java.io.File("/data/data/"+getPackageName(), "ObjNessB2W8HSV.idx.yml")
 //        val outputBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
 //        var outputSalMat = Mat()
