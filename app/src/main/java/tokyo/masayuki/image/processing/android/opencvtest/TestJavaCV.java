@@ -38,12 +38,11 @@ public class TestJavaCV {
         return mat2;
     }
 
-    static FloatPointer calculateBoundingBox(Context context) throws IOException {
-        String folderName = "ObjectnessTrainedModel";
-        //        String outputDirPath = context.getFilesDir().getPath() + "/" + folderName;
-        String outputDirPath = "/data/data/" + context.getPackageName() + "/" + folderName;
+    static FloatPointer calculateBoundingBox(Context context, opencv_core.Mat imageMat) throws IOException {
+        String folderName = "model";
+        String outputDirPath = context.getFilesDir().getPath() + "/" + folderName;
+//        String outputDirPath = "/data/data/" + context.getPackageName() + "/" + folderName;
         copyAssets(context, outputDirPath, folderName);
-        opencv_core.Mat imageMat = loadImageMatWithImageInDataFolder(context);
         opencv_saliency.ObjectnessBING objectnessBING = opencv_saliency.ObjectnessBING.create();
         // assets
         objectnessBING.setTrainingPath(context.getFilesDir().getPath() + "/" + folderName);
@@ -53,6 +52,24 @@ public class TestJavaCV {
         if (Objects.isNull(pointer)) {
             System.out.println("pointer is null");
         }
+        System.out.println("saliency: " + bool);
+        System.out.println(bingMat.empty());
+        return pointer;
+    }
+
+    static FloatPointer calculateBoundingBoxSimple(opencv_core.Mat imageMat) {
+        String folderName = "model";
+        opencv_saliency.ObjectnessBING objectnessBING = opencv_saliency.ObjectnessBING.create();
+        // assets
+        objectnessBING.setTrainingPath("file:///android_asset/model/");
+        opencv_core.Mat bingMat = new opencv_core.Mat();
+        Boolean bool = objectnessBING.computeSaliency(imageMat, bingMat);
+        FloatPointer pointer = objectnessBING.getobjectnessValues();
+        if (Objects.isNull(pointer)) {
+            System.out.println("pointer is null");
+        }
+        System.out.println("saliency: " + bool);
+        System.out.println(bingMat.empty());
         return pointer;
     }
 
@@ -126,6 +143,17 @@ public class TestJavaCV {
 
 
     // Test
+    static opencv_core.Mat testLoadImageMatInDataFolder(Context context) throws IOException {
+        String folderName = "image";
+        String outputDir = "/data/data/" + context.getPackageName() + "/" + folderName;
+        copyAssets(context, outputDir, folderName);
+        String[] files = context.getAssets().list(folderName);
+        String path = outputDir + "/" + files[0];
+        // bitmapMat is bgr format
+        Mat bitmapMat = Imgcodecs.imread(path);
+        return convertMat(bitmapMat);
+    }
+
     static Bitmap testLoadBitmapInDataFolder(Context context) throws IOException {
         String folderName = "image";
         String outputDir = "/data/data/" + context.getPackageName() + "/" + folderName;
